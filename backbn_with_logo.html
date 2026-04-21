@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Backbn — AI Lab</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&family=Syne:wght@400;500;700;800&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #06090f;
+    --bg1: #0d1117;
+    --bg2: #131a24;
+    --border: rgba(255,255,255,0.06);
+    --border2: rgba(255,255,255,0.11);
+    --text: #e8edf5;
+    --muted: #5a6478;
+    --accent: #00b4e6;
+    --accent2: #0056b8;
+    --accent3: #00e5cc;
+    --accent-glow: rgba(0,180,230,0.12);
+    --mono: 'IBM Plex Mono', monospace;
+    --sans: 'Syne', sans-serif;
+    --tr: all 0.25s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+  }
+  body.light {
+    --bg: #f2f4f8; --bg1: #ffffff; --bg2: #eaecf2;
+    --border: rgba(0,0,0,0.07); --border2: rgba(0,0,0,0.12);
+    --text: #0d1117; --muted: #6b7280;
+    --accent: #0066b3; --accent2: #004a8f; --accent3: #00b4a0;
+    --accent-glow: rgba(0,102,179,0.09);
+  }
+
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg); color: var(--text);
+    font-family: var(--sans); font-size: 15px; line-height: 1.6;
+    overflow-x: hidden; transition: background 0.3s, color 0.3s;
+  }
+  body::before {
+    content: ''; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    background-image: linear-gradient(var(--border) 1px, transparent 1px),
+      linear-gradient(90deg, var(--border) 1px, transparent 1px);
+    background-size: 72px 72px; pointer-events: none; z-index: 0;
+  }
+  body::after {
+    content: ''; position: fixed; top: 0; left: 0; right: 0; height: 100vh;
+    background: radial-gradient(ellipse 70% 50% at 15% 25%, var(--accent-glow) 0%, transparent 70%);
+    pointer-events: none; z-index: 0;
+  }
+  .page-wrap { position: relative; z-index: 1; }
+
+  /* ══ LOGO ══ */
+  .logo-img { display: block; object-fit: contain; transition: var(--tr); }
+  .logo-img-nav    { height: 44px; width: auto; }
+  .logo-img-hero   { height: 110px; width: auto; }
+  .logo-img-badge  { height: 32px; width: auto; }
+  .logo-img-footer { height: 38px; width: auto; }
+
+  /* darken logo slightly in light mode so it reads on white */
+  body.light .logo-img { filter: brightness(0.75) saturate(1.2); }
+
+  .logo-lockup {
+    display: flex; align-items: center; gap: 14px;
+    text-decoration: none;
+  }
+  .logo-lockup:hover .logo-img { filter: drop-shadow(0 0 12px rgba(0,180,230,0.5)); transform: scale(1.03); }
+  body.light .logo-lockup:hover .logo-img { filter: brightness(0.75) saturate(1.2) drop-shadow(0 0 10px rgba(0,100,180,0.5)); }
+
+  .logo-text { display: flex; flex-direction: column; gap: 3px; }
+  .logo-name {
+    font-family: var(--sans); font-weight: 800;
+    letter-spacing: -0.03em; line-height: 1; color: var(--text);
+  }
+  .logo-name .b2 { color: var(--accent); }
+  .logo-rule {
+    height: 2px; width: 65%;
+    background: linear-gradient(90deg, var(--accent), var(--accent3), transparent);
+    transition: width 0.3s;
+  }
+  .logo-lockup:hover .logo-rule { width: 100%; }
+  .logo-tag {
+    font-family: var(--mono); text-transform: uppercase;
+    letter-spacing: 2px; color: var(--muted);
+  }
+  .logo-nav .logo-name  { font-size: 22px; }
+  .logo-nav .logo-tag   { font-size: 6px; }
+  .logo-hero .logo-name { font-size: 60px; letter-spacing: -0.04em; }
+  .logo-hero .logo-rule { height: 3px; margin-top: 6px; }
+  .logo-hero .logo-tag  { font-size: 10px; letter-spacing: 2.5px; margin-top: 4px; }
+  .logo-footer .logo-name { font-size: 18px; }
+  .logo-footer .logo-tag  { font-size: 5.5px; }
+
+  /* ══ NAV ══ */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 52px; height: 76px;
+    border-bottom: 1px solid var(--border);
+    background: rgba(6,9,15,0.88); backdrop-filter: blur(24px);
+    transition: var(--tr);
+  }
+  body.light nav { background: rgba(242,244,248,0.88); }
+  .nav-links { display: flex; align-items: center; gap: 36px; list-style: none; }
+  .nav-links a {
+    font-family: var(--mono); font-size: 11px; color: var(--muted);
+    text-decoration: none; letter-spacing: 0.1em; text-transform: uppercase;
+    transition: var(--tr); position: relative;
+  }
+  .nav-links a::after { content: ''; position: absolute; bottom: -4px; left: 0; width: 0; height: 1px; background: var(--accent); transition: width 0.2s; }
+  .nav-links a:hover { color: var(--text); }
+  .nav-links a:hover::after { width: 100%; }
+  .nav-right { display: flex; align-items: center; gap: 14px; }
+  .theme-btn {
+    width: 44px; height: 26px; background: var(--bg2);
+    border: 1px solid var(--border2); border-radius: 40px;
+    cursor: pointer; display: flex; align-items: center;
+    padding: 0 6px; transition: var(--tr); position: relative;
+  }
+  .theme-btn:hover { border-color: var(--accent); }
+  .theme-btn .knob {
+    width: 16px; height: 16px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent), var(--accent3));
+    transition: transform 0.25s ease;
+  }
+  body.light .theme-btn .knob { transform: translateX(18px); }
+  .nav-cta {
+    font-family: var(--mono); font-size: 11px; letter-spacing: 0.07em;
+    text-transform: uppercase; padding: 9px 22px;
+    background: var(--accent); color: #06090f; border: none;
+    cursor: pointer; font-weight: 600; text-decoration: none;
+    transition: var(--tr);
+    clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px));
+  }
+  body.light .nav-cta { color: #fff; }
+  .nav-cta:hover { opacity: 0.85; transform: translateY(-1px); }
+
+  /* ══ HERO ══ */
+  .hero {
+    min-height: 100vh; padding: 120px 52px 80px;
+    display: grid; grid-template-columns: 1fr 420px;
+    gap: 80px; align-items: center;
+    max-width: 1300px; margin: 0 auto;
+  }
+  .hero-tag {
+    font-family: var(--mono); font-size: 11px; letter-spacing: 0.12em;
+    text-transform: uppercase; color: var(--accent); margin-bottom: 28px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .hero-tag::before { content: ''; display: block; width: 32px; height: 1.5px; background: linear-gradient(90deg, var(--accent), var(--accent3)); }
+  .hero-sub { font-size: 17px; color: var(--muted); line-height: 1.8; max-width: 500px; margin-bottom: 44px; }
+  .hero-actions { display: flex; align-items: center; gap: 20px; flex-wrap: wrap; }
+  .hero-logo-wrap { margin-bottom: 36px; }
+
+  .btn-primary {
+    font-family: var(--mono); font-size: 12px; font-weight: 600;
+    letter-spacing: 0.06em; padding: 14px 32px;
+    background: var(--accent); color: #06090f; border: none;
+    cursor: pointer; text-decoration: none; display: inline-block; transition: var(--tr);
+    clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px));
+  }
+  body.light .btn-primary { color: #fff; }
+  .btn-primary:hover { opacity: 0.85; transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,180,230,0.3); }
+  .btn-ghost {
+    font-family: var(--mono); font-size: 12px; letter-spacing: 0.06em;
+    padding: 14px 32px; background: transparent; color: var(--muted);
+    border: 1px solid var(--border2); cursor: pointer;
+    text-decoration: none; display: inline-block; transition: var(--tr);
+  }
+  .btn-ghost:hover { color: var(--text); border-color: rgba(255,255,255,0.3); transform: translateY(-2px); }
+
+  .hero-terminal {
+    background: var(--bg1); border: 1px solid var(--border2);
+    transition: transform 0.3s, box-shadow 0.3s; position: relative; overflow: hidden;
+  }
+  .hero-terminal::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+    background: linear-gradient(90deg, transparent, var(--accent), var(--accent3), transparent);
+  }
+  .hero-terminal:hover { transform: translateY(-4px); box-shadow: 0 20px 40px -12px rgba(0,0,0,0.5), 0 0 0 1px rgba(0,180,230,0.1); }
+  .terminal-bar { padding: 12px 18px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 8px; }
+  .terminal-dot { width: 10px; height: 10px; border-radius: 50%; }
+  .terminal-body { padding: 24px; line-height: 2.2; font-family: var(--mono); font-size: 12px; }
+  .t-m { color: var(--muted); } .t-w { color: var(--text); }
+  .t-a { color: var(--accent); } .t-a3 { color: var(--accent3); }
+  .t-cursor { display: inline-block; width: 7px; height: 14px; background: var(--accent); vertical-align: middle; animation: blink 1s steps(1) infinite; }
+  @keyframes blink { 50% { opacity: 0; } }
+  .hero-badge { margin-top: 20px; display: flex; align-items: center; gap: 14px; padding: 14px 18px; border: 1px solid var(--border); background: var(--bg1); transition: var(--tr); }
+  .hero-badge:hover { border-color: rgba(0,180,230,0.2); background: var(--bg2); }
+  .badge-text { font-family: var(--mono); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent); }
+
+  /* ══ TICKER ══ */
+  .ticker { border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); padding: 14px 0; overflow: hidden; white-space: nowrap; background: rgba(0,0,0,0.25); position: relative; }
+  .ticker::before, .ticker::after { content: ''; position: absolute; top: 0; bottom: 0; width: 80px; z-index: 2; pointer-events: none; }
+  .ticker::before { left: 0; background: linear-gradient(90deg, var(--bg), transparent); }
+  .ticker::after  { right: 0; background: linear-gradient(-90deg, var(--bg), transparent); }
+  .ticker-track { display: inline-flex; gap: 56px; animation: ticker 36s linear infinite; }
+  .ticker-item { font-family: var(--mono); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); display: flex; align-items: center; gap: 10px; transition: color 0.2s; }
+  .ticker-item:hover { color: var(--accent); }
+  .ticker-sep { color: var(--accent); opacity: 0.6; }
+  @keyframes ticker { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+
+  /* ══ SECTIONS ══ */
+  section { padding: 100px 52px; max-width: 1300px; margin: 0 auto; }
+  .section-tag { font-family: var(--mono); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin-bottom: 16px; display: flex; align-items: center; gap: 10px; }
+  .section-tag::before { content: ''; display: block; width: 24px; height: 1.5px; background: var(--accent); }
+  h2 { font-family: var(--sans); font-size: clamp(30px, 4vw, 52px); font-weight: 800; letter-spacing: -0.04em; line-height: 1.08; margin-bottom: 24px; }
+
+  .about-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: center; margin-top: 64px; }
+  .about-body { font-size: 16px; color: var(--muted); line-height: 1.8; }
+  .about-body p + p { margin-top: 22px; }
+  .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--border); }
+  .stat-cell { background: var(--bg1); padding: 36px 32px; transition: var(--tr); position: relative; overflow: hidden; }
+  .stat-cell::after { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, var(--accent), var(--accent3)); transform: scaleX(0); transform-origin: left; transition: transform 0.3s; }
+  .stat-cell:hover::after { transform: scaleX(1); }
+  .stat-cell:hover { background: var(--bg2); }
+  .stat-num { font-family: var(--mono); font-size: 44px; font-weight: 400; letter-spacing: -0.04em; color: var(--accent); line-height: 1; margin-bottom: 8px; }
+  .stat-label { font-family: var(--mono); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
+
+  .services-wrap { max-width: 1300px; margin: 0 auto; padding: 100px 52px; border-top: 1px solid var(--border); }
+  .services-head { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 64px; border-bottom: 1px solid var(--border); padding-bottom: 48px; flex-wrap: wrap; gap: 20px; }
+  .service-list { display: flex; flex-direction: column; }
+  .service-item { display: grid; grid-template-columns: 72px 1fr 180px; gap: 40px; align-items: start; padding: 44px 0; border-bottom: 1px solid var(--border); cursor: pointer; transition: var(--tr); position: relative; }
+  .service-item::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 2px; background: linear-gradient(180deg, var(--accent), var(--accent3)); transform: scaleY(0); transform-origin: top; transition: transform 0.3s; }
+  .service-item:hover::before { transform: scaleY(1); }
+  .service-item:hover { transform: translateX(8px); background: rgba(0,180,230,0.03); padding-left: 16px; }
+  .service-num { font-family: var(--mono); font-size: 11px; color: var(--accent); font-weight: 500; padding-top: 4px; }
+  .service-title { font-family: var(--sans); font-size: 24px; font-weight: 700; letter-spacing: -0.03em; line-height: 1.2; margin-bottom: 12px; }
+  .service-desc { font-size: 14px; color: var(--muted); line-height: 1.7; max-width: 480px; }
+  .service-tags { display: flex; flex-wrap: wrap; gap: 8px; padding-top: 6px; }
+  .tag { font-family: var(--mono); font-size: 9px; letter-spacing: 0.07em; text-transform: uppercase; padding: 5px 12px; border: 1px solid var(--border2); color: var(--muted); transition: all 0.2s; cursor: default; }
+  .tag:hover { border-color: var(--accent); color: var(--accent); background: rgba(0,180,230,0.06); }
+
+  .work-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--border); margin-top: 64px; }
+  .work-card { background: var(--bg1); padding: 52px; position: relative; overflow: hidden; cursor: pointer; transition: var(--tr); }
+  .work-card::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, var(--accent), var(--accent3)); transform: scaleX(0); transform-origin: left; transition: transform 0.4s; }
+  .work-card:hover::after { transform: scaleX(1); }
+  .work-card:hover { background: var(--bg2); transform: translateY(-4px); box-shadow: 0 16px 32px -12px rgba(0,0,0,0.4); }
+  .work-card-large { grid-column: span 2; }
+  .work-type { font-family: var(--mono); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin-bottom: 20px; }
+  .work-title { font-family: var(--sans); font-size: 24px; font-weight: 700; letter-spacing: -0.03em; margin-bottom: 16px; }
+  .work-desc { font-size: 14px; color: var(--muted); line-height: 1.7; margin-bottom: 32px; max-width: 85%; }
+  .work-arrow { font-family: var(--mono); font-size: 11px; color: var(--accent); display: flex; align-items: center; gap: 8px; transition: var(--tr); }
+  .work-card:hover .work-arrow { gap: 14px; }
+  .work-metric { position: absolute; top: 52px; right: 52px; font-family: var(--mono); font-size: 10px; color: var(--muted); text-align: right; }
+  .work-metric strong { display: block; font-size: 30px; font-weight: 400; color: var(--accent3); margin-top: 4px; }
+
+  .process-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: var(--border); margin-top: 64px; }
+  .process-step { background: var(--bg1); padding: 48px 32px; transition: var(--tr); position: relative; overflow: hidden; }
+  .process-step::before { content: attr(data-step); font-family: var(--mono); font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--accent); display: block; margin-bottom: 24px; font-weight: 500; }
+  .process-step::after { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, var(--accent), var(--accent3)); transform: scaleX(0); transform-origin: left; transition: transform 0.3s; }
+  .process-step:hover::after { transform: scaleX(1); }
+  .process-step:hover { background: var(--bg2); }
+  .process-step h3 { font-family: var(--sans); font-size: 20px; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 14px; }
+  .process-step p { font-size: 13px; color: var(--muted); line-height: 1.7; }
+
+  .team-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--border); margin-top: 64px; }
+  .team-card { background: var(--bg1); padding: 48px; transition: var(--tr); }
+  .team-card:hover { background: var(--bg2); transform: translateY(-4px); }
+  .team-avatar { width: 60px; height: 60px; background: var(--bg2); border: 1px solid var(--border2); display: flex; align-items: center; justify-content: center; font-family: var(--mono); font-size: 16px; font-weight: 600; color: var(--accent); margin-bottom: 24px; transition: var(--tr); clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px)); }
+  .team-card:hover .team-avatar { border-color: var(--accent); background: rgba(0,180,230,0.08); }
+  .team-name { font-family: var(--sans); font-size: 19px; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 6px; }
+  .team-role { font-family: var(--mono); font-size: 10px; letter-spacing: 0.09em; text-transform: uppercase; color: var(--accent); margin-bottom: 16px; }
+  .team-bio { font-size: 13px; color: var(--muted); line-height: 1.7; }
+
+  .cta-band { background: var(--bg1); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+  .cta-inner { max-width: 1300px; margin: 0 auto; padding: 100px 52px; display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: center; }
+  .contact-form { display: flex; flex-direction: column; gap: 20px; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .form-field { display: flex; flex-direction: column; gap: 8px; }
+  .form-field label { font-family: var(--mono); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
+  .form-field input, .form-field textarea { background: var(--bg); border: 1px solid var(--border2); color: var(--text); font-family: var(--mono); font-size: 13px; padding: 12px 14px; outline: none; transition: all 0.2s; resize: none; }
+  .form-field input:focus, .form-field textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-glow); }
+  .form-field textarea { min-height: 110px; }
+
+  .footer-wrap { max-width: 1300px; margin: 0 auto; padding: 70px 52px 50px; display: grid; grid-template-columns: 1.4fr 1fr 1fr 1fr; gap: 52px; border-top: 1px solid var(--border); }
+  .footer-tagline { font-size: 13px; color: var(--muted); line-height: 1.7; max-width: 220px; margin-top: 14px; }
+  .footer-col h4 { font-family: var(--mono); font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); margin-bottom: 22px; }
+  .footer-col ul { list-style: none; display: flex; flex-direction: column; gap: 12px; }
+  .footer-col a { font-size: 13px; color: var(--muted); text-decoration: none; transition: var(--tr); }
+  .footer-col a:hover { color: var(--text); padding-left: 4px; }
+  .footer-bottom { max-width: 1300px; margin: 0 auto; padding: 24px 52px; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border); }
+  .footer-bottom p { font-family: var(--mono); font-size: 11px; color: var(--muted); }
+
+  .toast { position: fixed; bottom: 24px; right: 24px; background: var(--bg1); border: 1px solid var(--accent); border-left: 3px solid var(--accent); color: var(--text); font-family: var(--mono); font-size: 12px; padding: 12px 20px; z-index: 200; opacity: 0; transform: translateY(16px); transition: opacity 0.2s, transform 0.2s; pointer-events: none; box-shadow: 0 4px 16px rgba(0,0,0,0.3); }
+  .toast.show { opacity: 1; transform: translateY(0); }
+  ::selection { background: var(--accent); color: #06090f; }
+
+  @media (max-width: 1000px) {
+    nav { padding: 0 24px; }
+    .nav-links { display: none; }
+    .hero { grid-template-columns: 1fr; gap: 48px; padding: 100px 24px 60px; }
+    .logo-img-hero { height: 70px; }
+    .logo-hero .logo-name { font-size: 40px; }
+    .about-grid, .cta-inner { grid-template-columns: 1fr; gap: 48px; }
+    .service-item { grid-template-columns: 1fr; gap: 12px; }
+    .process-grid, .team-grid { grid-template-columns: 1fr; }
+    .work-card-large { grid-column: span 1; }
+    .work-grid { grid-template-columns: 1fr; }
+    .footer-wrap { grid-template-columns: 1fr 1fr; gap: 36px; }
+    section, .services-wrap { padding: 70px 24px; }
+    .cta-inner { padding: 70px 24px; }
+  }
+</style>
+</head>
+<body>
+<div class="page-wrap">
+
+<!-- NAV -->
+<nav>
+  <a href="#" class="logo-lockup logo-nav">
+    <img src="Adobe Express - file.png" alt="Backbn logo" class="logo-img logo-img-nav">
+    <div class="logo-text">
+      <div class="logo-name">BACK<span class="b2">B</span>N</div>
+      <div class="logo-rule"></div>
+      <div class="logo-tag">Infrastructure · Strength · Reliability</div>
+    </div>
+  </a>
+  <ul class="nav-links">
+    <li><a href="#about">About</a></li>
+    <li><a href="#services">Services</a></li>
+    <li><a href="#work">Work</a></li>
+    <li><a href="#team">Team</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+  <div class="nav-right">
+    <button class="theme-btn" id="themeBtn"><div class="knob"></div></button>
+    <a href="#contact" class="nav-cta">Start a project</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<div style="max-width:1300px;margin:0 auto;">
+  <div class="hero">
+    <div>
+      <div class="hero-tag">AI Lab · Infrastructure Research</div>
+      <div class="hero-logo-wrap">
+        <a href="#" class="logo-lockup logo-hero" style="align-items:flex-start;">
+            <img src="Adobe Express - file.png" alt="Backbn logo" alt="Backbn logo" class="logo-img logo-img-hero">
+
+          <div class="logo-text">
+            <div class="logo-name">BACK<span class="b2">B</span>N</div>
+            <div class="logo-rule"></div>
+            <div class="logo-tag">AI LAB · INFRASTRUCTURE · STRENGTH · RELIABILITY</div>
+          </div>
+        </a>
+      </div>
+      <p class="hero-sub">We help ambitious AI labs design, deploy, and scale production AI systems. From LLM inference to training clusters — embedded engineers, not slide decks.</p>
+      <div class="hero-actions">
+        <a href="#contact" class="btn-primary">Work with us →</a>
+        <a href="#work" class="btn-ghost">See our work</a>
+      </div>
+    </div>
+    <div>
+      <div class="hero-terminal">
+        <div class="terminal-bar">
+          <div class="terminal-dot" style="background:#ff5f57"></div>
+          <div class="terminal-dot" style="background:#febc2e"></div>
+          <div class="terminal-dot" style="background:#28c840"></div>
+          <span style="font-family:var(--mono);font-size:10px;color:var(--muted);margin-left:8px;">backbn · ai lab diagnostics</span>
+        </div>
+        <div class="terminal-body">
+          <div><span class="t-m">$</span> <span style="color:var(--accent2)">backbn</span> <span class="t-w">lab diagnose --cluster prod</span></div>
+          <div class="t-m">Scanning LLM serving stack...</div>
+          <div><span class="t-a3">✓</span> <span class="t-w">Inference latency: 142ms p95</span></div>
+          <div><span class="t-a3">✓</span> <span class="t-w">GPU utilisation: 78%</span></div>
+          <div><span class="t-a3">✓</span> <span class="t-w">Model version: Llama-3-70B</span></div>
+          <div style="color:#ff5f57">⚠ <span class="t-w">Context window bottleneck detected</span></div>
+          <div class="t-m">Running optimisation pass...</div>
+          <div><span class="t-a3">✓</span> <span class="t-w">Fix: vLLM + tensor parallelism</span></div>
+          <div><span class="t-m">$</span> <span class="t-cursor"></span></div>
+        </div>
+      </div>
+      <div class="hero-badge">
+            <img src="Adobe Express - file.png" alt="Backbn logo" alt="Backbn logo" class="logo-img logo-img-badge">
+        <span class="badge-text">Production. Scale. Intelligence.</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TICKER -->
+<div class="ticker"><div class="ticker-track">
+  <span class="ticker-item"><span class="ticker-sep">—</span>LLM Deployment</span>
+  <span class="ticker-item"><span class="ticker-sep">—</span>GPU Clusters</span>
+  <span class="ticker-item"><span class="ticker-sep">—</span>Model Serving</span>
+  <span class="ticker-item"><span class="ticker-sep">—</span>RAG Pipelines</span>
+  <span class="ticker-item"><span class="ticker-sep">—</span>AI Observability</span>
+  <span class="ticker-item"><span class="ticker-sep">—</span>Fine-tuning Infra</span>
+  <span class="ticker-item"><span class="ticker-sep">—</span>Vector Databases</span>
+  <span class="ticker-item"><span class="ticker-sep">—</span>Inference Optimisation</span>
+  <span class="ticker-item"><span class="ticker-sep">—</span>LLM Deployment</span>
+  <span class="ticker-item"><span class="ticker-sep">—</span>GPU Clusters</span>
+  <span class="ticker-item"><span class="ticker-sep">—</span>Model Serving</span>
+  <span class="ticker-item"><span class="ticker-sep">—</span>RAG Pipelines</span>
+  <span class="ticker-item"><span class="ticker-sep">—</span>AI Observability</span>
+  <span class="ticker-item"><span class="ticker-sep">—</span>Fine-tuning Infra</span>
+  <span class="ticker-item"><span class="ticker-sep">—</span>Vector Databases</span>
+  <span class="ticker-item"><span class="ticker-sep">—</span>Inference Optimisation</span>
+</div></div>
+
+<!-- ABOUT -->
+<section id="about">
+  <div class="section-tag">Who we are</div>
+  <h2>AI Lab.<br>Production infrastructure.</h2>
+  <div class="about-grid">
+    <div class="about-body">
+      <p>Backbn AI Lab was founded by engineers who've built AI systems at scale — from LLM serving clusters handling millions of requests to training infrastructure for frontier models. We don't do theoretical AI strategy. We ship infrastructure that works under load.</p>
+      <p>We're a lean team of ML engineers, systems architects, and platform builders embedded inside your AI lab. No 200-page strategy decks. No generic AI frameworks — just real infrastructure that makes your models perform.</p>
+      <p>We operate at the AI backbone: the layer where inference latency, GPU utilisation, and data throughput determine whether your AI product succeeds or fails. That's where we've built our craft.</p>
+    </div>
+    <div class="stat-grid">
+      <div class="stat-cell"><div class="stat-num">50B+</div><div class="stat-label">Tokens served monthly</div></div>
+      <div class="stat-cell"><div class="stat-num">99.99%</div><div class="stat-label">Inference uptime</div></div>
+      <div class="stat-cell"><div class="stat-num">73%</div><div class="stat-label">Avg. latency reduction</div></div>
+      <div class="stat-cell"><div class="stat-num">4x</div><div class="stat-label">GPU efficiency gain</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- SERVICES -->
+<div class="services-wrap" id="services">
+  <div class="services-head">
+    <div><div class="section-tag">What we do</div><h2>AI Lab practice areas</h2></div>
+    <a href="#contact" class="btn-ghost">Discuss your AI project →</a>
+  </div>
+  <div class="service-list">
+    <div class="service-item"><div class="service-num">01 —</div><div><div class="service-title">LLM Deployment &amp; Serving</div><div class="service-desc">Production-grade LLM inference stacks using vLLM, TensorRT-LLM, or TGI. We optimise for throughput, latency, and cost across GPU clusters.</div></div><div class="service-tags"><span class="tag">vLLM</span><span class="tag">TGI</span><span class="tag">TensorRT</span></div></div>
+    <div class="service-item"><div class="service-num">02 —</div><div><div class="service-title">GPU Cluster Architecture</div><div class="service-desc">Design and operation of multi-node GPU clusters for training and inference. Scheduling, networking, and orchestration at scale.</div></div><div class="service-tags"><span class="tag">Kubernetes</span><span class="tag">Slurm</span><span class="tag">NVIDIA</span></div></div>
+    <div class="service-item"><div class="service-num">03 —</div><div><div class="service-title">RAG &amp; Vector Infra</div><div class="service-desc">End-to-end retrieval pipelines: vector databases, embedding pipelines, hybrid search, and real-time indexing at scale.</div></div><div class="service-tags"><span class="tag">Qdrant</span><span class="tag">Milvus</span><span class="tag">LangChain</span></div></div>
+    <div class="service-item"><div class="service-num">04 —</div><div><div class="service-title">AI Observability &amp; Evaluation</div><div class="service-desc">Monitor LLM performance, drift detection, hallucination metrics, and cost tracking with tracing and custom evaluation pipelines.</div></div><div class="service-tags"><span class="tag">LangSmith</span><span class="tag">Arize</span><span class="tag">OpenTelemetry</span></div></div>
+  </div>
+</div>
+
+<!-- WORK -->
+<section id="work" style="padding-top:0;border-top:1px solid var(--border);">
+  <div class="section-tag">Selected work</div>
+  <h2>AI Lab engagements</h2>
+  <div class="work-grid">
+    <div class="work-card work-card-large"><div class="work-metric">Inference cost<strong>-62%</strong></div><div class="work-type">GenAI startup · LLM serving · 2024</div><div class="work-title">Optimising LLM inference for 10M+ daily requests</div><div class="work-desc" style="max-width:560px;">A Series A generative AI startup was burning $80K/month on inference. We migrated them to vLLM with continuous batching — cutting costs by 62% while reducing p95 latency from 2.1s to 340ms.</div><div class="work-arrow">View case study →</div></div>
+    <div class="work-card"><div class="work-metric">Training time<strong>3.2× faster</strong></div><div class="work-type">Enterprise · Training infra · 2024</div><div class="work-title">Multi-node fine-tuning cluster for a Fortune 500</div><div class="work-desc">We built an 8-node H100 cluster with FSDP + Flash Attention, reducing fine-tuning time from 6 days to 44 hours.</div><div class="work-arrow">View case study →</div></div>
+    <div class="work-card"><div class="work-metric">Retrieval latency<strong>89ms</strong></div><div class="work-type">Legal tech · RAG pipeline · 2023</div><div class="work-title">Real-time RAG over 5M legal documents</div><div class="work-desc">Hybrid vector + keyword pipeline with Qdrant, achieving 89ms p95 retrieval and 99.5% recall.</div><div class="work-arrow">View case study →</div></div>
+  </div>
+</section>
+
+<!-- PROCESS -->
+<div style="border-top:1px solid var(--border);">
+  <section>
+    <div class="section-tag">How we work</div>
+    <h2>Embedded AI engineers,<br>not consultants.</h2>
+    <div class="process-grid">
+      <div class="process-step" data-step="Step 01"><h3>Audit</h3><p>Two weeks inside your AI stack — inference pipelines, GPU utilisation, data flow. No assumptions.</p></div>
+      <div class="process-step" data-step="Step 02"><h3>Design</h3><p>Actionable plan with concrete tradeoffs: cost vs latency, throughput vs accuracy.</p></div>
+      <div class="process-step" data-step="Step 03"><h3>Build</h3><p>Our engineers work alongside yours, writing production infrastructure and transferring knowledge.</p></div>
+      <div class="process-step" data-step="Step 04"><h3>Operate</h3><p>Post-launch support, runbooks, and ongoing optimisation to keep AI systems performing.</p></div>
+    </div>
+  </section>
+</div>
+
+<!-- TEAM -->
+<section id="team" style="border-top:1px solid var(--border);">
+  <div class="section-tag">The team</div>
+  <h2>People who've scaled AI<br>in production.</h2>
+  <div class="team-grid">
+    <div class="team-card"><div class="team-avatar">SA</div><div class="team-name">Sara Almutairi</div><div class="team-role">Founder &amp; Principal</div><div class="team-bio">Former ML infra lead at OpenAI and Cohere. Built serving infrastructure for GPT-3 and production LLMs.</div></div>
+    <div class="team-card"><div class="team-avatar">JK</div><div class="team-name">James Kowalski</div><div class="team-role">ML Systems Architect</div><div class="team-bio">Designed multi-cluster GPU infrastructure at Anthropic. Expert in distributed training and Kubernetes for ML.</div></div>
+    <div class="team-card"><div class="team-avatar">PN</div><div class="team-name">Priya Nambiar</div><div class="team-role">AI Reliability Lead</div><div class="team-bio">Built observability platforms at Google DeepMind. Specialises in LLM monitoring and cost-aware inference.</div></div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<div class="cta-band" id="contact">
+  <div class="cta-inner">
+    <div>
+      <div class="section-tag">Get in touch</div>
+      <h2>Let's talk<br>AI Lab infrastructure.</h2>
+      <p style="color:var(--muted);font-size:16px;line-height:1.7;margin-bottom:32px;">Every engagement starts with a free 60-minute AI infrastructure audit. No pitch, no slides — just a conversation about your models and your stack.</p>
+      <div style="font-family:var(--mono);font-size:12px;color:var(--muted);">
+        <div style="margin-bottom:10px;">hello@backbn.ai</div>
+        <div>Response within 1 business day</div>
+      </div>
+    </div>
+    <div class="contact-form">
+      <div class="form-row">
+        <div class="form-field"><label>Name</label><input type="text" id="fName" placeholder="Your name"></div>
+        <div class="form-field"><label>Company / Lab</label><input type="text" id="fCompany" placeholder="AI Lab name"></div>
+      </div>
+      <div class="form-field"><label>Email</label><input type="email" id="fEmail" placeholder="you@company.com"></div>
+      <div class="form-field"><label>What AI challenge are you facing?</label><textarea id="fMsg" placeholder="Describe your models, scale, or infrastructure challenge..."></textarea></div>
+      <button class="btn-primary" id="sendBtn" style="align-self:flex-start;">Send message →</button>
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<div class="footer-wrap">
+  <div>
+    <a href="#" class="logo-lockup logo-footer">
+<img src="Adobe Express - file.png" alt="Backbn logo" alt="Backbn logo" class="logo-img logo-img-footer">
+      <div class="logo-text">
+        <div class="logo-name">BACK<span class="b2">B</span>N</div>
+        <div class="logo-rule"></div>
+        <div class="logo-tag">AI LAB · INFRASTRUCTURE</div>
+      </div>
+    </a>
+    <p class="footer-tagline">AI infrastructure for labs shipping models that matter.</p>
+  </div>
+  <div class="footer-col"><h4>Services</h4><ul><li><a href="#services">LLM Deployment</a></li><li><a href="#services">GPU Clusters</a></li><li><a href="#services">RAG Pipelines</a></li><li><a href="#services">AI Observability</a></li></ul></div>
+  <div class="footer-col"><h4>Company</h4><ul><li><a href="#about">About</a></li><li><a href="#work">Work</a></li><li><a href="#team">Team</a></li><li><a href="#">Research</a></li></ul></div>
+  <div class="footer-col"><h4>Connect</h4><ul><li><a href="#">GitHub</a></li><li><a href="#">LinkedIn</a></li><li><a href="mailto:hello@backbn.ai">hello@backbn.ai</a></li></ul></div>
+</div>
+<div class="footer-bottom">
+  <p>© 2025 Backbn AI Lab. All rights reserved.</p>
+  <p>AI infrastructure specialists</p>
+</div>
+
+</div>
+<div id="toast" class="toast"></div>
+
+<script>
+(function() {
+  document.querySelectorAll('a[href^="#"]').forEach(a => {
+    a.addEventListener('click', e => {
+      const id = a.getAttribute('href');
+      if (id === '#') return;
+      const el = document.querySelector(id);
+      if (el) { e.preventDefault(); el.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+    });
+  });
+  function toast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg; t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 3000);
+  }
+  document.querySelectorAll('.work-card').forEach(c => c.addEventListener('click', () => toast('📄 ' + (c.querySelector('.work-title')?.innerText||'') + ' (demo)')));
+  document.querySelectorAll('.service-item').forEach(s => s.addEventListener('click', () => toast('🔍 ' + (s.querySelector('.service-title')?.innerText||'') + ' — contact us.')));
+  document.getElementById('sendBtn').addEventListener('click', e => {
+    e.preventDefault();
+    const name = document.getElementById('fName').value.trim();
+    const email = document.getElementById('fEmail').value.trim();
+    const msg = document.getElementById('fMsg').value.trim();
+    if (!name) { toast('❌ Please enter your name.'); return; }
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { toast('❌ Please enter a valid email.'); return; }
+    if (!msg) { toast('❌ Please describe your AI challenge.'); return; }
+    const btn = document.getElementById('sendBtn');
+    btn.textContent = '✓ Sent'; btn.style.background = '#0056b8';
+    toast('✓ Thanks ' + name + '! We\'ll reply within 1 business day.');
+    ['fName','fCompany','fEmail','fMsg'].forEach(id => { document.getElementById(id).value = ''; });
+    setTimeout(() => { btn.textContent = 'Send message →'; btn.style.background = 'var(--accent)'; }, 2500);
+  });
+  const btn = document.getElementById('themeBtn');
+  if (localStorage.getItem('backbn-theme') === 'light') document.body.classList.add('light');
+  btn.addEventListener('click', () => {
+    document.body.classList.toggle('light');
+    localStorage.setItem('backbn-theme', document.body.classList.contains('light') ? 'light' : 'dark');
+  });
+})();
+</script>
+</body>
+</html>
