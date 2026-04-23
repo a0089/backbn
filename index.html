@@ -31,7 +31,6 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* Page transitions */
 .page {
   position: fixed; 
   inset: 0;
@@ -98,9 +97,7 @@ body {
   opacity: 0;
   animation: fadeUp 0.5s ease 0.15s forwards;
 }
-.logo-mark .b { 
-  color: var(--accent); 
-}
+.logo-mark .b { color: var(--accent); }
 
 .logo-sub {
   font-family: var(--mono);
@@ -133,6 +130,18 @@ body {
   position: relative;
   height: 100vh;
   overflow-y: auto;
+  scrollbar-width: thin;
+}
+
+.panel-right::-webkit-scrollbar {
+  width: 4px;
+}
+.panel-right::-webkit-scrollbar-track {
+  background: rgba(255,255,255,0.05);
+}
+.panel-right::-webkit-scrollbar-thumb {
+  background: rgba(0,180,230,0.3);
+  border-radius: 4px;
 }
 
 .panel-right::before {
@@ -334,6 +343,10 @@ body {
   gap: 20px;
   opacity: 0; 
   animation: fadeUp 0.4s ease 0.05s forwards;
+  background: var(--bg);
+  position: sticky;
+  top: 0;
+  z-index: 10;
 }
 
 .c-logo {
@@ -377,16 +390,28 @@ body {
 .c-body {
   flex: 1; 
   display: flex; 
-  justify-content: center; 
-  align-items: center;
-  padding: 20px 24px 40px;
+  justify-content: center;
+  padding: 20px 24px 60px;
   overflow-y: auto;
+  scrollbar-width: thin;
+}
+
+.c-body::-webkit-scrollbar {
+  width: 4px;
+}
+.c-body::-webkit-scrollbar-track {
+  background: rgba(255,255,255,0.05);
+}
+.c-body::-webkit-scrollbar-thumb {
+  background: rgba(0,180,230,0.3);
+  border-radius: 4px;
 }
 
 .c-wrap { 
   width: 100%; 
   max-width: 480px; 
   margin: 0 auto;
+  padding-bottom: 20px;
 }
 
 .c-title {
@@ -477,7 +502,8 @@ body {
   letter-spacing: 0.12em; 
   text-transform: uppercase;
   cursor: pointer; 
-  margin-top: 12px;
+  margin-top: 20px;
+  margin-bottom: 10px;
   transition: all 0.2s;
 }
 .f-submit:hover:not(:disabled) {
@@ -561,7 +587,7 @@ body {
   
   .panel-left {
     height: 40vh;
-    min-height: 300px;
+    min-height: 280px;
   }
   
   .panel-left-inner {
@@ -581,6 +607,7 @@ body {
     height: auto;
     min-height: 60vh;
     padding: 40px 32px;
+    overflow-y: visible;
   }
   
   .panel-right::before {
@@ -601,6 +628,11 @@ body {
   
   .c-nav {
     padding: 24px 32px;
+    position: relative;
+  }
+  
+  .c-body {
+    padding: 16px 20px 40px;
   }
 }
 
@@ -679,7 +711,12 @@ body {
   }
   
   .c-body {
-    padding: 16px 20px 32px;
+    padding: 16px 16px 30px;
+  }
+  
+  .f-submit {
+    margin-top: 16px;
+    padding: 14px;
   }
 }
 
@@ -696,7 +733,7 @@ body {
   }
   
   .r-headline {
-    font-size: 30px;
+    font-size: 28px;
   }
   
   .pill {
@@ -709,7 +746,21 @@ body {
   }
   
   .c-nav {
-    padding: 16px 20px;
+    padding: 14px 20px;
+  }
+  
+  .c-body {
+    padding: 12px 16px 25px;
+  }
+  
+  .f-input, .f-textarea {
+    padding: 11px 15px;
+    font-size: 13px;
+  }
+  
+  .f-submit {
+    padding: 12px;
+    font-size: 11px;
   }
 }
 
@@ -731,6 +782,14 @@ body {
   
   .panel-right {
     min-height: auto;
+  }
+  
+  .c-body {
+    padding: 12px 20px 20px;
+  }
+  
+  .c-wrap {
+    max-width: 450px;
   }
 }
 
